@@ -3,8 +3,9 @@ import logo from './logo.svg'
 import './App.css'
 
 function Square(props) {
+  const className = "square" + props.hightLight;
   return(
-    <button className="square" onClick={() => props.onClick()}>
+    <button className={className} onClick={() => props.onClick()}>
       {props.value}
     </button>
   )
@@ -12,18 +13,25 @@ function Square(props) {
 
 class Board extends React.Component {
 
-  renderSquare(i) {
+  renderSquare(i, hightLight) {
     // 这里很神奇，既是调用Square，又可以看做是Board的定义。
     // this指的是Board，通过携带参数 i，把 onClick 事件分散出去到每个 square 上。
-    return <Square value={this.props.squares[i]} key={i} onClick={() => this.props.onClick(i)}/>;
+    return <Square value={this.props.squares[i]} key={i} hightLight={hightLight} onClick={() => this.props.onClick(i)}/>;
   }
 
   renderBody(rows, columns) {
+    const line = this.props.line;
     let body = [];
     for (let i = 0; i < rows; i++) {
       let square_row = [];
       for (let j = 0; j < columns; j++) {
-        square_row.push(this.renderSquare(i * columns + j))
+        let square;
+        if (line && line.indexOf(i * columns + j) > -1 ) {
+          square = this.renderSquare(i * columns + j, ' hightLight');
+        } else {
+          square = this.renderSquare(i * columns + j, '');
+        }
+        square_row.push(square)
       }
       body.push([<div className="board-row">{square_row}</div>])
     }
@@ -84,8 +92,6 @@ class MoveList extends React.Component {
         {/* //我才想起来moves是个数组，之前以为必须是组件、HTML、JS最简单的字符串数字这样的数据结构。 */}
         {/* // 通过上面这行注释，我明白了一件事。在元素tag的开始标签如 <ul>之后，是jsx语法。某个结束标签如</ul>之后，又是普通的js。 */}
       </div>
-
-
     )
   }
 }
@@ -129,14 +135,17 @@ class Game extends React.Component {
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-    const locations = this.state.locations
+    const result = calculateWinner(current.squares);
+    const locations = this.state.locations;
 
     let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
+    let line;
+    if (result) {
+      status = 'Winner: ' + result.winner;
+      line = result.line;
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+      line = null;
     }
 
     return (
@@ -144,6 +153,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={current.squares}
+            line={line}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
@@ -172,7 +182,7 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return {winner: squares[a], line: lines[i]};
     }
   }
   return null;

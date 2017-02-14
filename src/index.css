@@ -31,6 +31,10 @@ ol, ul {
   width: 34px;
 }
 
+.square.hightLight {
+  color: aqua;
+}
+
 .square:focus {
   outline: none;
 }
