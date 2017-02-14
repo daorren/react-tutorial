@@ -45,7 +45,8 @@ class MoveList extends React.Component {
   constructor() {
     super();
     this.state = {
-      isSelected: null
+      isSelected: null,
+      isAscending: true
     }
   }
   handleClick(i) {
@@ -53,25 +54,38 @@ class MoveList extends React.Component {
       isSelected: i
     })
   }
+  clickButton() {
+    this.setState({isAscending: !this.state.isAscending})
+  }
   render() {
-    const moves = this.props.history.map((step, move) => {
-      const desc = move ?
-        'Move #' + move :
+    let arr = Array(this.props.history.length).fill().map((x, i) => i)
+    let arr_with_direction = this.state.isAscending ? arr : arr.reverse();
+    const moves = arr_with_direction.map((val, index) => {
+      const desc = val ?
+        'Move #' + val :
         'Game start';
       return (
-        <li key={move}>
-          {computeCoordinate(this.props.locations[move])}
+        <li key={val}>
+          {computeCoordinate(this.props.locations[val])}
           <a href="#" onClick={() => {
-              this.props.onClick(move);
-              this.handleClick(move);
-            }}>{this.state.isSelected == move ? <b>{desc}</b> : desc} {/* desc在大括号里面的大括号 */}
+              this.props.onClick(val);
+              this.handleClick(val);
+            }}>{this.state.isSelected == val ? <b>{desc}</b> : desc} {/* desc在大括号里面的大括号 */}
           </a>
         </li>
       );
     });
     return(
-      <ul>{moves}</ul>  //我才想起来moves是个数组，之前以为必须是组件、HTML、JS最简单的字符串数字这样的数据结构。
-      // 通过上面这行注释，我明白了一件事。在元素tag的开始标签如 <ul>之后，是jsx语法。某个结束标签如</ul>之后，又是普通的js。
+      // 这里必须把两个元素用一个div包起来，否则报错 Adjacent JSX elements must be wrapped in an enclosing tag
+      // React中，return要么只返回一个元素，要么以数组的形式返回。
+      <div>
+        <button onClick={() => this.clickButton()}>{this.state.isAscending ? 'Descend' : 'Ascend'}</button>
+        <ul>{moves}</ul>
+        {/* //我才想起来moves是个数组，之前以为必须是组件、HTML、JS最简单的字符串数字这样的数据结构。 */}
+        {/* // 通过上面这行注释，我明白了一件事。在元素tag的开始标签如 <ul>之后，是jsx语法。某个结束标签如</ul>之后，又是普通的js。 */}
+      </div>
+
+
     )
   }
 }
