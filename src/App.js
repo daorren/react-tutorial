@@ -13,6 +13,8 @@ function Square(props) {
 class Board extends React.Component {
 
   renderSquare(i) {
+    // 这里很神奇，既是调用Square，又可以看做是Board的定义。
+    // this指的是Board，通过携带参数 i，把 onClick 事件分散出去到每个 square 上。
     return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)}/>;
   }
   render() {
@@ -37,6 +39,41 @@ class Board extends React.Component {
     );
   }
 }
+
+class MoveList extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      isSelected: null
+    }
+  }
+  handleClick(i) {
+    this.setState({
+      isSelected: i
+    })
+  }
+  render() {
+    const moves = this.props.history.map((step, move) => {
+      const desc = move ?
+        'Move #' + move :
+        'Game start';
+      return (
+        <li key={move}>
+          {computeCoordinate(this.props.locations[move])}
+          <a href="#" onClick={() => {
+              this.props.onClick(move);
+              this.handleClick(move);
+            }}>{this.state.isSelected == move ? <b>{desc}</b> : desc} {/* desc在大括号里面的大括号 */}
+          </a>
+        </li>
+      );
+    });
+    return(
+      <ul>{moves}</ul>
+    )
+  }
+}
+
 
 class Game extends React.Component {
   constructor(){
@@ -85,17 +122,7 @@ class Game extends React.Component {
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
-    const moves = history.map((step, move) => {
-      const desc = move ?
-        'Move #' + move :
-        'Game start';
-      return (
-        <li key={move}>
-          {computeCoordinate(locations[move])}
-          <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
-        </li>
-      );
-    });
+
     return (
       <div className="game">
         <div className="game-board">
@@ -106,7 +133,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ul>{moves}</ul>
+          <MoveList history={history} locations={locations} onClick={(i) => this.jumpTo(i)} />
         </div>
       </div>
     );
