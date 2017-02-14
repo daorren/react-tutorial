@@ -15,26 +15,27 @@ class Board extends React.Component {
   renderSquare(i) {
     // 这里很神奇，既是调用Square，又可以看做是Board的定义。
     // this指的是Board，通过携带参数 i，把 onClick 事件分散出去到每个 square 上。
-    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)}/>;
+    return <Square value={this.props.squares[i]} key={i} onClick={() => this.props.onClick(i)}/>;
   }
+
+  renderBody(rows, columns) {
+    let body = [];
+    for (let i = 0; i < rows; i++) {
+      let square_row = [];
+      for (let j = 0; j < columns; j++) {
+        square_row.push(this.renderSquare(i * columns + j))
+      }
+      body.push([<div className="board-row">{square_row}</div>])
+    }
+    // 返回的body是个嵌套数组，[[<div>[sq, sq, sq]</div>], [], []]。
+    // [<div>[sq, sq, sq]</div>, <>, <>]而这种是无效的
+    return body
+  }
+
   render() {
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {this.renderBody(3, 3)}
       </div>
     );
   }
@@ -69,7 +70,8 @@ class MoveList extends React.Component {
       );
     });
     return(
-      <ul>{moves}</ul>
+      <ul>{moves}</ul>  //我才想起来moves是个数组，之前以为必须是组件、HTML、JS最简单的字符串数字这样的数据结构。
+      // 通过上面这行注释，我明白了一件事。在元素tag的开始标签如 <ul>之后，是jsx语法。某个结束标签如</ul>之后，又是普通的js。
     )
   }
 }
