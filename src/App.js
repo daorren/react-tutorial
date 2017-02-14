@@ -46,7 +46,8 @@ class Game extends React.Component {
         squares: Array(9).fill(null)
       }],
       xIsNext: true,
-      stepNumber: 0
+      stepNumber: 0,
+      locations: [0]
     }
   }
   handleClick(i) {
@@ -62,7 +63,8 @@ class Game extends React.Component {
         squares: squares
       }]),
       xIsNext: !this.state.xIsNext,
-      stepNumber: history.length
+      stepNumber: history.length,
+      locations: this.state.locations.slice(0, history.length).concat([i + 1])
     });
   }
   jumpTo(step) {
@@ -75,6 +77,7 @@ class Game extends React.Component {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const locations = this.state.locations
 
     let status;
     if (winner) {
@@ -88,6 +91,7 @@ class Game extends React.Component {
         'Game start';
       return (
         <li key={move}>
+          {computeCoordinate(locations[move])}
           <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
         </li>
       );
@@ -102,7 +106,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <ul>{moves}</ul>
         </div>
       </div>
     );
@@ -129,6 +133,15 @@ function calculateWinner(squares) {
     }
   }
   return null;
+}
+
+function computeCoordinate(n) {
+  if (n === 0) {
+    return null
+  }
+  const x = (n % 3) === 0 ? parseInt(n / 3, 10) : parseInt(n / 3, 10) + 1;
+  const y = (n % 3) === 0 ? 3 : (n % 3);
+  return `(${x}, ${y})`; // ES6 字符串插值
 }
 
 
